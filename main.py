@@ -2,6 +2,11 @@ import os
 from os import path
 import shutil
 import time
+import datetime
+
+
+current_time = datetime.datetime.now()
+date_int = int(str(current_time.year) + str(current_time.month) + str(current_time.day))
 
 
 downloads_path = "C:\\Users\\sudha\\Downloads"
@@ -34,12 +39,25 @@ class desktop_cleaner:
         lst_of_dir = cleaner.get_directory()
         
         for i in lst_of_dir:
-            
             if '.exe' in i or '.zip' in i or '.iso' in i or '.rar' in i:
-                path = f'{self.downloads}\\{i}'
                 os.remove(path)
             else:
                 print('Nothing Found')
+
+    def older_file_remover(self):
+        lst_of_dir = cleaner.get_directory()
+        
+        for i in lst_of_dir:
+            path = f'{self.downloads}\\{i}'
+            m_time = os.path.getmtime(path)
+            m_time = time.ctime(m_time)
+            t_obj = time.strptime(m_time)
+            time_stamp = time.strftime('%Y%m%d', t_obj)
+            time_stamp = int(time_stamp)
+            
+            if date_int - time_stamp > 30:
+                os.remove(path)
+            else: print(f'{i} => {date_int - time_stamp}')
                 
     def file_mover(self):
         
@@ -51,14 +69,18 @@ class desktop_cleaner:
             if '.pdf' or '.ppt' in x:
                 shutil.copy(path, self.class_room)
                 shutil.copy(path, self.docs)
+                time.sleep(3)
                 os.remove(path)
                 
             elif ".jpg" in x or ".jpeg" in x or ".jfif" in x or ".pjpeg" in x or '.pjp' in x or '.png' in x:
                 shutil.copy(path, self.images)
+                time.sleep(3)
                 os.remove(path)
+                
 
 if __name__ == '__main__':
     cleaner = desktop_cleaner(downloads_path, images_path, docs_path, videos_path, music_path, class_room_path)
-    cleaner.get_directory()
-    cleaner.exe_iso_zip_remover()
-    cleaner.file_mover()
+    # cleaner.get_directory()
+    # cleaner.exe_iso_zip_remover()
+    # cleaner.file_mover()
+    cleaner.older_file_remover()
