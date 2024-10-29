@@ -36,6 +36,7 @@ class desktop_cleaner():
                 print(f'{file} => Deleted')
                 logging.info(f'{file} was removed from {path}')
                 os.remove(path)
+                self.lst_of_dir.remove(file)
                 file_count += 1
         if file_count == 0:
             print('Nothing Found')
@@ -55,6 +56,7 @@ class desktop_cleaner():
             if date_int - time_stamp > days_old:
                 logging.info(f'{file} was removed from {path}')
                 os.remove(path)
+                self.lst_of_dir.remove(file)
                 file_count += 1
             else: print(f'{file} => {date_int - time_stamp}')
         if file_count == 0:
@@ -67,10 +69,16 @@ class desktop_cleaner():
             path = os.path.join(self.directory, file)
 
             if any(file.endswith(ext) for ext in extensions):
-                shutil.move(path, target_directory)
-                logging.info(f'{file} was moved to {target_directory}')
-                file_count += 1
-                print(f'{file} => Moved to {self.class_room}')
+                if os.path.exists(os.path.join(target_directory,file)):
+                    os.remove(path)
+                    print(f'{file} => removed\n----------------------')
+                    self.lst_of_dir.remove(file)
+                else:
+                    shutil.move(path, target_directory)
+                    logging.info(f'{file} was moved to {target_directory}')
+                    self.lst_of_dir.remove(file)
+                    file_count += 1
+                    print(f'{file} => Moved to {target_directory}\n-------------------')
                 
         if file_count == 0:
             logging.info('Nothing was moved at the moment.')
@@ -87,16 +95,17 @@ class graphics():
     def program_executor(self):
         
         cleaner = desktop_cleaner(self.file_path, self.images, self.docs, self.videos, self.music)
+        cleaner.older_file_remover(30)   
         cleaner.remove_file_extensions({".exe", ".iso", ".zip", ".rar"})
         cleaner.move_files(self.docs, {".pdf", ".docx", ".ppt", ".txt"})
         cleaner.move_files(self.images, {".jpg", ".jpeg", ".png"})
-        cleaner.older_file_remover(30)   
         Label(self.root, text= "Everything Logged In...", font=("Ariel", 15, 'bold')).pack()
         logging.info("---Done---")
         messagebox.showinfo("", "Program ran succesfully!!")
         
     def file_directory(self):
         path = filedialog.askdirectory()
+        print(path)
         if path:
             self.file_path = path
             Label(self.root, text=f"Selected Directory: {self.file_path}", font=("Arial", 12)).pack()
@@ -126,7 +135,7 @@ class graphics():
     def music_directory(self):
         path = filedialog.askdirectory()
         if path:
-            self.file_path = path
+            self.music = path
             Label(self.root, text=f"Selected Directory: {self.music}", font=("Arial", 12)).pack()
             messagebox.showinfo("", "File Path set!")
             
@@ -138,12 +147,11 @@ class graphics():
         Label(self.root, text='Welcome to Desktop Cleaner', font=("Montserrat", 25)).pack()
         Label(self.root, text='A solution to organizing your space\n\n', font=("Montserrat", 20)).pack()
         
-        Button(self.root, text='Choose Directory',fg="white",font=("Ariel", 15, 'bold'),bg='black', width=25, command=graphics.file_directory).pack(pady=10)
-        Button(self.root, text='Choose Images Folder',fg="white",font=("Ariel", 15, 'bold'),bg='black', width=25, command=graphics.img_directory).pack(pady=10)
+        Button(self.root, text='Choose Directory',fg="white",font=("Ariel", 15, 'bold'),bg='black', width=25, command=self.file_directory).pack(pady=10)
+        Button(self.root, text='Choose Images Folder',fg="white",font=("Ariel", 15, 'bold'),bg='black', width=25, command=self.img_directory).pack(pady=10)
         Button(self.root, text='Choose Documents Folder',fg="white",font=("Ariel", 15, 'bold'),bg='black', width=25, command=graphics.docs_directory).pack(pady=10)
-        Button(self.root, text='Choose Music Folder',fg="white",font=("Ariel", 15, 'bold'),bg='black', width=25, command=graphics.music_directory).pack(pady=10)
-        Button(self.root, text='Choose Videos Folder',fg="white",font=("Ariel", 15, 'bold'),bg='black', width=25, command=graphics.videos_directory).pack(pady=10)
-        
+        Button(self.root, text='Choose Music Folder',fg="white",font=("Ariel", 15, 'bold'),bg='black', width=25, command=self.music_directory).pack(pady=10)
+        Button(self.root, text='Choose Videos Folder',fg="white",font=("Ariel", 15, 'bold'),bg='black', width=25, command=self.videos_directory).pack(pady=10)
         
         Label(self.root, text='Clicking the button will delete all the packages or zip files,\ndocuments will be moved to Documents Folder and Images to Images Folder.',font=("Ariel", 15, 'bold') ).pack()
         Button(self.root, text='Run the Program', fg="white",font=("Ariel", 15, 'bold'),bg='black', width=25, command=graphics.program_executor).pack(pady=10)
