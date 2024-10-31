@@ -63,23 +63,26 @@ class desktop_cleaner():
             logging.info('Nothing was removed at the moment.')
             
     def move_files(self, target_directory, extensions):
-        
+        file_to_remove = []
         file_count = 0
         for file in self.lst_of_dir:
             path = os.path.join(self.directory, file)
 
             if any(file.endswith(ext) for ext in extensions):
                 if os.path.exists(os.path.join(target_directory,file)):
+                    print(f'{file} => exists in {target_directory}')
                     os.remove(path)
                     print(f'{file} => removed\n----------------------')
-                    self.lst_of_dir.remove(file)
                 else:
                     shutil.move(path, target_directory)
                     logging.info(f'{file} was moved to {target_directory}')
-                    self.lst_of_dir.remove(file)
                     file_count += 1
                     print(f'{file} => Moved to {target_directory}\n-------------------')
+                file_to_remove.append(file)
                 
+        for file in file_to_remove:
+            self.lst_of_dir.remove(file)
+            
         if file_count == 0:
             logging.info('Nothing was moved at the moment.')
         
@@ -97,7 +100,7 @@ class graphics():
         cleaner = desktop_cleaner(self.file_path, self.images, self.docs, self.videos, self.music)
         cleaner.older_file_remover(30)   
         cleaner.remove_file_extensions({".exe", ".iso", ".zip", ".rar"})
-        cleaner.move_files(self.docs, {".pdf", ".docx", ".ppt", ".txt"})
+        cleaner.move_files(self.docs, {".pdf", ".docx", ".ppt", ".txt", ".pptx"})
         cleaner.move_files(self.images, {".jpg", ".jpeg", ".png"})
         Label(self.root, text= "Everything Logged In...", font=("Ariel", 15, 'bold')).pack()
         logging.info("---Done---")
